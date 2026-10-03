@@ -1,0 +1,94 @@
+import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import crypto from 'node:crypto';
+
+const root = path.resolve(__dirname, '..');
+let app: ElectronApplication;
+let page: Page;
+let dataDir: string;
+
+async function launch() {
+  const env = { ...process.env, GAL_AGENT_DATA_DIR: path.join(dataDir, 'data'), GAL_AGENT_SHELL_DATA_DIR: path.join(dataDir, 'shell') };
+  delete env.ELECTRON_RUN_AS_NODE;
+  app = await electron.launch({ args: [root], env, timeout: 45000 });
+  page = await app.firstWindow();
+  await expect(page.getByText('本地会话已就绪')).toBeVisible({ timeout: 40000 });
+}
+
+test('desktop sessions, guide isolation, overlay, rename, delete and restart', async () => {
+  dataDir = path.join(root, 'test-results', 'desktop-' + crypto.randomUUID());
+  await fs.mkdir(dataDir, { recursive: true });
+  try {
+    await launch();
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await expect(page.getByRole('heading', { name: '让模型，走进故事。' })).toBeVisible();
+    await page.getByRole('button', { name: '新建会话', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: '新建会话' });
+    await expect(dialog.locator('input')).toHaveCount(1);
+    await dialog.getByLabel('会话名称').fill('海猫 · 第一段旅程');
+    await dialog.getByRole('button', { name: '创建会话' }).click();
+    await expect(page.getByRole('heading', { name: '海猫 · 第一段旅程', exact: true })).toBeVisible();
+    await page.getByLabel('引导内容').fill('关注人物之间的承诺');
+    await page.getByLabel('引导范围').selectOption('persistent');
+    await page.getByRole('button', { name: '发送', exact: true }).click();
+    await expect(page.getByText('持续 · 关注人物之间的承诺')).toBeVisible();
+    await page.getByRole('button', { name: '新建会话', exact: true }).click();
+    await page.getByLabel('会话名称').fill('沙耶 · 独立旅程');
+    await page.getByRole('button', { name: '创建会话' }).click();
+    await expect(page.getByRole('heading', { name: '沙耶 · 独立旅程', exact: true })).toBeVisible();
+    await expect(page.getByText('持续 · 关注人物之间的承诺')).toHaveCount(0);
+    await page.getByRole('button', { name: '管理 沙耶 · 独立旅程' }).click();
+    await page.getByRole('button', { name: '重命名', exact: true }).click();
+    await page.getByLabel('会话名称').fill('沙耶 · 新名称');
+    await page.getByRole('button', { name: '保存名称' }).click();
+    await expect(page.getByRole('heading', { name: '沙耶 · 新名称', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '添加模型配置', exact: true }).click();
+    const modelDialog = page.getByRole('dialog', { name: '添加模型配置' });
+    await modelDialog.getByLabel('配置名称', { exact: true }).fill('本地测试配置');
+    await modelDialog.getByLabel('API URL', { exact: true }).fill('http://127.0.0.1:12345/v1');
+    await modelDialog.getByLabel('模型名称', { exact: true }).fill('test-vision');
+    await modelDialog.getByRole('button', { name: '保存配置' }).click();
+    await expect(page.getByText('test-vision', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '悬浮窗', exact: true }).click();
+    await expect.poll(async () => app.windows().length).toBe(2);
+    const overlay = app.windows()[1];
+    await expect(overlay.getByText('沙耶 · 新名称', { exact: true })).toBeVisible();
+    await expect(overlay.getByRole('region',{name:'运行控制'})).toBeVisible();
+    expect(await overlay.locator('.overlay-buttons button').allTextContents()).toEqual(['暂停 / 接管','确认进度对齐','开始']);
+    await expect(overlay.getByRole('button',{name:'确认进度对齐',exact:true})).toBeDisabled();
+    await expect(overlay.getByRole('button',{name:'开始',exact:true})).toBeDisabled();
+    await expect(overlay.getByText('请先在主窗口选择游戏窗口',{exact:true})).toBeVisible();
+    await expect.poll(()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('#overlay'))!.isFocusable())).toBe(false);
+    await overlay.getByRole('button',{name:'暂停 / 接管',exact:true}).click();
+    await expect.poll(()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('#overlay'))!.isFocusable())).toBe(false);
+    await overlay.getByRole('button',{name:'收起悬浮窗',exact:true}).click();
+    await expect(overlay.getByRole('region',{name:'运行控制'})).toBeVisible();
+    await expect(overlay.getByRole('button',{name:'暂停 / 接管',exact:true})).toBeInViewport();
+    await overlay.getByRole('button',{name:'展开悬浮窗',exact:true}).click();
+    await overlay.getByRole('button',{name:'编辑引导',exact:true}).click();
+    await expect.poll(()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('#overlay'))!.isFocusable())).toBe(true);
+    await overlay.getByLabel('引导内容').fill('悬浮窗的新引导');
+    await overlay.getByRole('button',{name:'发送引导',exact:true}).click();
+    await expect(overlay.getByText('下一步 · 悬浮窗的新引导',{exact:true})).toBeVisible();
+    await overlay.getByRole('button',{name:'返回观看',exact:true}).click();
+    await expect.poll(()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('#overlay'))!.isFocusable())).toBe(false);
+    await expect(overlay.getByLabel('引导内容')).toHaveAttribute('readonly','');
+    await page.screenshot({ path: path.join(root, 'test-results', 'main-window.png') });
+    await overlay.screenshot({ path: path.join(root, 'test-results', 'overlay-window.png') });
+    await app.close();
+    await launch();
+    await expect(page.getByRole('button', { name: /海猫 · 第一段旅程/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /沙耶 · 新名称/ }).first()).toBeVisible();
+    await page.getByRole('button', { name: /^海猫 · 第一段旅程/ }).click();
+    await expect(page.getByText('持续 · 关注人物之间的承诺')).toBeVisible();
+    await page.getByRole('button', { name: '管理 沙耶 · 新名称' }).click();
+    await page.getByRole('button', { name: '删除会话', exact: true }).click();
+    await page.getByRole('dialog', { name: '删除会话' }).getByRole('button', { name: '删除会话', exact: true }).click();
+    await expect(page.getByRole('button', { name: '管理 沙耶 · 新名称' })).toHaveCount(0);
+    const sessions = await page.evaluate(async () => (await window.gal!.api('GET', '/sessions')).data);
+    expect(sessions).toHaveLength(1);
+    expect(errors).toEqual([]);
+  } finally { await app?.close().catch(() => {}); }
+});

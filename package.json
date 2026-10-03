@@ -1,0 +1,32 @@
+{
+  "name": "gal-agent",
+  "version": "0.2.0",
+  "private": true,
+  "description": "A window-scoped visual novel agent with persistent sessions",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.cjs",
+    "build": "tsc -p frontend/tsconfig.json && vite build --config frontend/vite.config.ts",
+    "start": "npm run build && electron .",
+    "test": "node --test desktop/*.test.cjs && playwright test",
+    "test:backend": ".venv\\Scripts\\python.exe -m pytest backend/tests -q",
+    "pack:backend": ".venv\\Scripts\\python.exe -m PyInstaller --noconfirm --distpath backend/dist --workpath backend/build backend/gal-backend.spec",
+    "pack": "npm run build && npm run pack:backend && node scripts/package.cjs --zip",
+    "pack:dir": "npm run build && npm run pack:backend && node scripts/package.cjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@electron/asar": "^4.3.1",
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^44.5.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  }
+}

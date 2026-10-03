@@ -1,0 +1,8 @@
+{
+  "advance_key": "SPACE",
+  "allowed_keys": ["SPACE", "ENTER", "UP", "DOWN", "LEFT", "RIGHT"],
+  "dialogue_region": [0.05, 0.58, 0.9, 0.38],
+  "settle_ms": 900,
+  "action_interval_ms": 1000,
+  "text_change_threshold": 2.0
+}
