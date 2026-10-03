@@ -20,3 +20,52 @@
 .model-error-entry p{font-size:13px;line-height:1.6;overflow-wrap:anywhere;}
 .model-error-entry summary{cursor:pointer;font-size:13px;}
 .model-error-entry pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto;font-size:12px;}
+
+/* 仅欢迎页使用看板娘背景；朦胧效果在 CSS 中实现，保留原图并让按钮保持清晰。
+   背景与蒙层不接受鼠标事件；脸部保留在画面中上方，创建按钮位于下方留白。 */
+.welcome-mascot{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  justify-content:flex-end;
+  padding:clamp(48px,10vh,104px) 32px;
+  background:#efe4dd;
+}
+.welcome-mascot-image{
+  position:absolute;
+  inset:-12px;
+  width:calc(100% + 24px);
+  height:calc(100% + 24px);
+  object-fit:cover;
+  object-position:50% 44%;
+  filter:blur(3px) saturate(.78);
+  opacity:.86;
+  pointer-events:none;
+  user-select:none;
+}
+.welcome-mascot-wash{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,#faf6ef12 0%,#faf6ef30 52%,#faf6efb8 100%);
+  pointer-events:none;
+}
+.welcome-mascot .welcome-create{
+  position:relative;
+  z-index:1;
+  min-height:48px;
+  border-radius:12px;
+  border-color:#98715e;
+  background:#704c3b;
+  color:#fffaf2;
+  font-size:14px;
+  box-shadow:0 10px 30px #4c2b2630;
+}
+.welcome-mascot .welcome-create:hover:not(:disabled){
+  background:#5e3e30;
+  border-color:#805842;
+  box-shadow:0 12px 34px #4c2b2640;
+}
+.welcome-mascot .welcome-create:focus-visible{
+  outline:3px solid #fffaf2;
+  outline-offset:4px;
+}

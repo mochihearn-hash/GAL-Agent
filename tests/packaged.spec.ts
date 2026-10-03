@@ -32,6 +32,9 @@ test('packaged app starts its frozen backend, captures fixture and resumes saved
     const health=await page.evaluate(async()=>(await window.gal!.api('GET','/health')).data);
     expect(health.version).toBe(version);
     expect(health.agent_framework).toBe('langchain');
+    // 从实际 asar 资源加载看板娘，避免源码可见而独立应用缺图。
+    await page.locator('.welcome-mascot-image').evaluate((image:HTMLImageElement)=>image.decode());
+    await page.screenshot({path:path.join(root,'test-results','welcome-mascot-packaged.png')});
     await page.getByRole('button',{name:'新建会话',exact:true}).click();
     await page.getByLabel('会话名称').fill('打包版 · 恢复测试');
     await page.getByRole('button',{name:'创建会话'}).click();

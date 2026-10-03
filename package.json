@@ -1,6 +1,6 @@
 {
   "name": "gal-agent",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "A window-scoped visual novel agent with persistent sessions",
   "main": "desktop/main.cjs",

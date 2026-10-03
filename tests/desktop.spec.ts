@@ -23,7 +23,10 @@ test('desktop sessions, guide isolation, overlay, rename, delete and restart', a
     await launch();
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await expect(page.getByRole('heading', { name: '让模型，走进故事。' })).toBeVisible();
+    await expect(page.getByRole('button', { name: '创建第一个会话', exact: true })).toBeEnabled();
+    // 首屏截图用于检查竖版素材的裁切、柔焦及按钮可读性。
+    await page.locator('.welcome-mascot-image').evaluate((image:HTMLImageElement)=>image.decode());
+    await page.screenshot({ path: path.join(root, 'test-results', 'welcome-mascot.png') });
     await page.getByRole('button', { name: '新建会话', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: '新建会话' });
     await expect(dialog.locator('input')).toHaveCount(1);

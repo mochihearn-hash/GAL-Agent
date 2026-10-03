@@ -2,11 +2,13 @@
 
 Windows 桌面应用，让视觉模型通过选定的游戏窗口阅读 GAL / 文字 RPG、推进对话、选择分支。React 前端、Electron 桌面外壳、Python 后端均在本项目中。
 
-0.2.0 使用 LangChain Agent 与中间件组织观察、模型判断和执行。普通一轮仍只请求一次视觉模型；界面不显示轮数，历史保留请求编号。源码虚拟环境已安装 LangChain，独立打包版内置依赖。
+从 0.2.0 起使用 LangChain Agent 与中间件组织观察、模型判断和执行。普通一轮仍只请求一次视觉模型；界面不显示轮数，历史保留请求编号。源码虚拟环境已安装 LangChain，独立打包版内置依赖。0.2.1 简化欢迎页，使用看板娘柔焦背景，仅保留创建会话按钮。
+
+[Windows 版本下载与更新说明](https://github.com/mochihearn-hash/GAL-Agent/releases)
 
 ## 直接使用
 
-打包产物位于 `release/`。解压 `GAL-Agent-0.2.0-Windows.zip` 后，打开其中的 `GAL-Agent-0.2.0/GAL Agent.exe`。本机也可以直接运行 `release/GAL-Agent-0.2.0/GAL Agent.exe`，请保留同目录资源。
+打包产物位于 `release/`。解压 `GAL-Agent-0.2.1-Windows.zip` 后，打开其中的 `GAL-Agent-0.2.1/GAL Agent.exe`。本机也可以直接运行 `release/GAL-Agent-0.2.1/GAL Agent.exe`，请保留同目录资源。
 
 从源码运行可在 PowerShell 中执行：
 
@@ -100,7 +102,7 @@ $env:ELECTRON_MIRROR='https://npmmirror.com/mirrors/electron/'
 node node_modules\electron\install.js
 ```
 
-本次更新操作说明见 `docs/UPDATE-0.2.0.md`。测试结果及限制见 `docs/VALIDATION.md`，架构见 `docs/ARCHITECTURE.md`，原始需求见 `docs/REQUIREMENTS.md`。
+本次更新操作说明见 `docs/UPDATE-0.2.1.md`。测试结果及限制见 `docs/VALIDATION.md`，架构见 `docs/ARCHITECTURE.md`，原始需求见 `docs/REQUIREMENTS.md`。
 
 ## 实现依据
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BookOpen, Plus, MoreHorizontal, Settings2, Play, Pause, Monitor, ArrowUpRight, Sparkles, MessageSquare, Clock3, ChevronDown, X, Check, LoaderCircle, RotateCcw, Download, Save, Eye, Send, Pencil, Trash2, Cable, CircleHelp, PanelLeftClose } from 'lucide-react';
 import { api, shortDate, labels, actionLabel } from './api';
+import { Welcome } from './Welcome';
 import { defaultProfile, type Session, type SessionItem, type ModelConfig, type RuntimeState, type StoryEvent, type Checkpoint, type GameWindow, type Profile } from './types';
 
 const initial: RuntimeState = { session_id:null,bound_session_id:null,status:'paused',message:'准备开始一段新的剧情',understanding:'',reason:'',next_action:null,window:null,run_version:0 };
@@ -183,11 +184,11 @@ export function App() {
         <button className="session-more" aria-label={`管理 ${item.name}`} onClick={()=>setMenuId(menuId===item.id?null:item.id)}><MoreHorizontal size={17}/></button>
         {menuId===item.id&&<div className="session-menu"><button onClick={()=>{setNameModal({id:item.id,name:item.name});setMenuId(null);}}><Pencil size={14}/>重命名</button><button className="danger-text" onClick={()=>{setDeleteId(item.id);setMenuId(null);}}><Trash2 size={14}/>删除会话</button></div>}
       </div>)}{sessions.length===0&&<p className="sidebar-empty">每段剧情，都有独立的记忆。<br/>创建你的第一个会话。</p>}</nav>
-      <div className="sidebar-bottom"><div className="local-indicator"><span className={`status-dot ${ready?'active':''}`}/>{ready?'本地会话已就绪':'正在连接后台'}</div><p>记录自动保存到这台电脑</p><span className="version">WINDOWS · v0.2.0</span></div>
+      <div className="sidebar-bottom"><div className="local-indicator"><span className={`status-dot ${ready?'active':''}`}/>{ready?'本地会话已就绪':'正在连接后台'}</div><p>记录自动保存到这台电脑</p><span className="version">WINDOWS · v0.2.1</span></div>
     </aside>
     <main className="main-area">
       <header className="topbar"><div className="breadcrumb"><BookOpen size={15}/><span>会话</span><span className="slash">/</span><strong>{session?.name||'欢迎来到剧情观测室'}</strong></div><div className="top-actions"><button className="text-button" disabled={!selected||!ready} onClick={()=>perform(async()=>{await window.gal?.exportSession(selected!);})}><Download size={15}/>导出记录</button><button className="secondary compact" disabled={!ready} onClick={()=>perform(async()=>{await window.gal?.showOverlay();})}><PanelLeftClose size={15}/>悬浮窗</button></div></header>
-      {!ready?<div className="welcome"><span className="welcome-symbol"><BookOpen size={42}/></span><h1>{bootError?'应用暂时未就绪':'正在打开剧情观测室'}</h1><p>{bootError||'正在启动本地后台，读取已保存的会话…'}</p>{!bootError&&<LoaderCircle className="spin" size={22}/>}</div>:!selected?<div className="welcome"><span className="welcome-symbol"><BookOpen size={42}/></span><span className="eyebrow">A DIFFERENT READER, A DIFFERENT STORY</span><h1>让模型，走进故事。</h1><p>观察它如何读懂人物、面对选择。<br/>每段旅程独立记录，随时暂停，随时继续。</p><button className="primary large" onClick={()=>setNameModal({name:''})}><Plus size={18}/>创建第一个会话</button><div className="welcome-features"><span><Monitor size={16}/>只观察选定窗口</span><span><Save size={16}/>剧情记忆持续保存</span><span><MessageSquare size={16}/>随时给出引导</span></div></div>:<div className="workspace">
+      {!ready?<div className="welcome"><span className="welcome-symbol"><BookOpen size={42}/></span><h1>{bootError?'应用暂时未就绪':'正在打开剧情观测室'}</h1><p>{bootError||'正在启动本地后台，读取已保存的会话…'}</p>{!bootError&&<LoaderCircle className="spin" size={22}/>}</div>:!selected?<Welcome onCreate={()=>setNameModal({name:''})}/>:<div className="workspace">
         <div className="workspace-heading"><div><span className="eyebrow">STORY SESSION</span><h1>{session?.name||'正在加载…'}</h1></div><div className="heading-status"><span className={`status-dot ${running?'active':''}`}/>{labels[currentState.status]||'已暂停'}</div></div>
         <div className="workspace-grid"><div className="story-column">
           <section className="preview-card"><div className="card-heading"><h2><Monitor size={16}/>游戏视窗</h2><div><button className="text-button" disabled={busy} onClick={()=>setProfileModal(true)}><Settings2 size={14}/>操作设置</button><button className="secondary compact" disabled={busy} onClick={()=>setWindowModal(true)}>{bound?'更换窗口':'选择窗口'}<ArrowUpRight size={14}/></button></div></div>

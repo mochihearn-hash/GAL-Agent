@@ -81,7 +81,7 @@ def create_app(root: Path, token: str, *, store=None, credentials=None, windows=
 
     @app.get("/health")
     async def health():
-        return {"ok":True,"version":"0.2.0","agent_framework":"langchain"}
+        return {"ok":True,"version":"0.2.1","agent_framework":"langchain"}
 
     @app.get("/state")
     async def state():
